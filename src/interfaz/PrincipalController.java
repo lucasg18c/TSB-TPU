@@ -18,7 +18,9 @@ public class PrincipalController {
     public void cambiarUbicacion(ActionEvent actionEvent) {
         DirectoryChooser dc = new DirectoryChooser();
         dc.setTitle("Seleccione ubicación de los datos");
-        dc.setInitialDirectory(new File(lblDireccion.getText()));
+
+        if (!lblDireccion.getText().equals("Seleccione origen de datos"))
+            dc.setInitialDirectory(new File(lblDireccion.getText()));
         File file =  dc.showDialog(null);
         if (file != null)
             lblDireccion.setText(file.getPath());

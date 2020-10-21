@@ -17,11 +17,7 @@ public class TextFile {
         String linea = "";
         try {
             Scanner sc = new Scanner(archivo);
-            while (sc.hasNext()) {
-                linea = sc.nextLine();
-                break;
-            }
-
+            if (sc.hasNext()) linea = sc.nextLine();
 
         } catch (FileNotFoundException exception) {
             System.err.println("No se pudo leer el archivo...");
