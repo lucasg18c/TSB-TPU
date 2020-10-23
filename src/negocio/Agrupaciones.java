@@ -3,6 +3,8 @@ package negocio;
 import soporte.TSBHashtable;
 import soporte.TextFile;
 
+import java.util.Collection;
+
 public class Agrupaciones {
     private TextFile fileAgrupaciones;
     private TextFile fileMesas;
@@ -23,5 +25,9 @@ public class Agrupaciones {
         )
             sb.append("\n" + o);
         return sb.toString();
+    }
+
+    public Collection getResultados() {
+        return table.values();
     }
 }

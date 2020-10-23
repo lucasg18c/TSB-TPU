@@ -1,19 +1,21 @@
 package interfaz;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
-import negocio.Agrupacion;
 import negocio.Agrupaciones;
-import soporte.TextFile;
+import negocio.Region;
+import negocio.Regiones;
 
 import java.io.File;
 
 public class PrincipalController {
     public Label lblDireccion;
-    public TextArea txtAgrupaciones;
+    public ListView lvwResultados;
+    public ComboBox cboDistrito;
+    public ComboBox cboSeccion;
 
     public void cambiarUbicacion(ActionEvent actionEvent) {
         DirectoryChooser dc = new DirectoryChooser();
@@ -28,13 +30,20 @@ public class PrincipalController {
 
     public void cargarDatos(ActionEvent actionEvent) {
         Agrupaciones agrupaciones = new Agrupaciones(lblDireccion.getText());
-        txtAgrupaciones.setText(agrupaciones.toString());
-        //Borrador
 
-        TextFile fileRegiones = new TextFile(lblDireccion.getText() + "\\descripcion_regiones.dsv");
-        System.out.println(fileRegiones.leerEncabezado());
+        ObservableList ol;
+        ol = FXCollections.observableArrayList(agrupaciones.getResultados());
+        lvwResultados.setItems(ol);
 
-        TextFile fileMesas = new TextFile(lblDireccion.getText() + "\\mesas_totales_agrp_politica.dsv");
-        System.out.println(fileMesas.leerEncabezado());
+        Regiones regiones = new Regiones(lblDireccion.getText());
+        ol = FXCollections.observableArrayList(regiones.getDistritos());
+        cboDistrito.setItems(ol);
+
+    }
+
+    public void filtrarSecciones(ActionEvent actionEvent) {
+        Region distrito = (Region) cboDistrito.getValue();
+        ObservableList ol = FXCollections.observableArrayList(distrito.getSubregiones());
+        cboSeccion.setItems(ol);
     }
 }
