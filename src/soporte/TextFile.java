@@ -76,7 +76,7 @@ public class TextFile {
     public Region identificarRegiones() {
         String linea = "", campos[], codigo, nombre;
         Region pais = new Region("00", "Argentina");
-        Region distrito;
+        Region distrito, seccion;
 
         try {
             Scanner sc = new Scanner(archivo);
@@ -86,12 +86,22 @@ public class TextFile {
 
                 codigo = campos[0];
                 nombre = campos[1];
+                switch (codigo.length()){
 
-                if (codigo.length() == 2) pais.agregarSubregion(new Region(codigo, nombre));
-                else if (codigo.length() == 5){
-                    distrito = pais.getSubregion(codigo.substring(0, 2));
-
-                    if (distrito != null) distrito.agregarSubregion(new Region(codigo, nombre));
+                    case  2:
+                        distrito = pais.getOrPutSubregion(codigo);
+                        distrito.setNombre(nombre);
+                        break;
+                    case 5:
+                        distrito = pais.getOrPutSubregion(codigo.substring(0, 2));
+                        seccion = distrito.getOrPutSubregion(codigo);
+                        seccion.setNombre(nombre);
+                        break;
+                    case 11:
+                        distrito = pais.getOrPutSubregion(codigo.substring(0,2));
+                        seccion = distrito.getOrPutSubregion(codigo.substring(0,5));
+                        seccion.agregarSubregion(new Region(codigo,nombre));
+                        break;
                 }
             }
 

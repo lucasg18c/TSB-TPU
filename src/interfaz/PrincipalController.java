@@ -16,6 +16,7 @@ public class PrincipalController {
     public ListView lvwResultados;
     public ComboBox cboDistrito;
     public ComboBox cboSeccion;
+    public ComboBox cboCircuito;
 
     public void cambiarUbicacion(ActionEvent actionEvent) {
         DirectoryChooser dc = new DirectoryChooser();
@@ -42,8 +43,23 @@ public class PrincipalController {
     }
 
     public void filtrarSecciones(ActionEvent actionEvent) {
+        ObservableList ol;
+        //Generamos lista de secciones del dsitrito elegido
         Region distrito = (Region) cboDistrito.getValue();
-        ObservableList ol = FXCollections.observableArrayList(distrito.getSubregiones());
+        ol = FXCollections.observableArrayList(distrito.getSubregiones());
         cboSeccion.setItems(ol);
+        cboCircuito.getItems().removeAll();
+    }
+
+    public void filtrarCircuitos(ActionEvent actionEvent) {
+        ObservableList ol;
+        //Genereamos lista de circuitos de la seccion
+        if (cboSeccion.getItems() != null){
+        Region seccion = (Region) cboSeccion.getValue();
+        ol = FXCollections.observableArrayList(seccion.getSubregiones());
+        cboCircuito.setItems(ol);
+        }
+        else
+            cboCircuito.getItems().removeAll();
     }
 }
