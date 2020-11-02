@@ -2,6 +2,7 @@ package soporte;
 
 import negocio.Agrupacion;
 import negocio.Region;
+import negocio.Resultados;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -109,5 +110,34 @@ public class TextFile {
             System.err.println("No se pudo leer el archivo...");
         }
         return pais;    }
+
+    public void sumarVotosPorRegion(Resultados resultados) {
+        String linea = "", campos[], codAgrupacion;
+
+        int votos;
+        try {
+            Scanner sc = new Scanner(archivo);
+            while (sc.hasNext()) {
+                linea = sc.nextLine();
+                campos = linea.split("\\|");
+                codAgrupacion = campos[5];
+                //Filtramos votacion para presidente
+                if (campos[4].compareTo("000100000000000") == 0) {
+                    votos = Integer.parseInt(campos[6]);
+                    resultados.sumarVotos("00", codAgrupacion, votos);
+
+                    for (int i = 0; i < 3; i++){
+                        resultados.sumarVotos(campos[i], codAgrupacion, votos);
+                        //SI NOS DA EL TIEMPO, ACÁ HAY QUE PONER OTRA SUMA PARA MESAS
+                    }
+
+                }
+            }
+
+
+        } catch (FileNotFoundException exception) {
+            System.err.println("No se pudo leer el archivo...");
+        }
+    }
 }
 

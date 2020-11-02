@@ -6,28 +6,29 @@ import soporte.TextFile;
 import java.util.Collection;
 
 public class Agrupaciones {
-    private TextFile fileAgrupaciones;
-    private TextFile fileMesas;
-    private TSBHashtable table;
+    private TSBHashtable conteo;
+    private static TSBHashtable inicial;
 
-    public Agrupaciones(String path) {
-        fileAgrupaciones = new TextFile(path + "\\descripcion_postulaciones.dsv");
-        fileMesas = new TextFile(path + "\\mesas_totales_agrp_politica.dsv");
-        table = fileAgrupaciones.identificarAgrupaciones();
-        fileMesas.sumarVotosPorAgrupacion(table);
+    public Agrupaciones() {
+        conteo = new TSBHashtable();
+
+        for (Object o: inicial.values()){
+            Agrupacion a = (Agrupacion) o;
+            conteo.put(a.getCodigo(), new Agrupacion(a.getCodigo(), a.getNombre()));
+        }
     }
 
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (Object o : table.values()
-        )
-            sb.append("\n" + o);
-        return sb.toString();
+    public static void leerAgrupaciones(String path){
+        TextFile fileAgrupaciones = new TextFile(path + "\\descripcion_postulaciones.dsv");
+        inicial = fileAgrupaciones.identificarAgrupaciones();
     }
+
+    public Agrupacion getAgrupacion(String codigoAgrupacion){
+        return (Agrupacion) conteo.get(codigoAgrupacion);
+    }
+
 
     public Collection getResultados() {
-        return table.values();
+        return conteo.values();
     }
 }
