@@ -183,9 +183,13 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
     @Override
     public V get(Object key)
     {
-        // HACER...
+        //HECHO
         if(key == null) throw new NullPointerException("get(): parámetro null");
 
+        K kKey = (K) key;
+        Map.Entry<K, V> res = search_for_entry(kKey, h(kKey));
+
+        if (res != null) return res.getValue();
         return null;
     }
 
@@ -240,9 +244,16 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
     @Override
     public V remove(Object key)
     {
-        // HACER...
+        // HECHO
         if(key == null) throw new NullPointerException("remove(): parámetro null");
 
+        K kKey = (K) key;
+        int indice = search_for_index(kKey, h(kKey));
+        if (indice != -1){
+            Map.Entry<K, V> res = (Entry<K, V>) table[indice];
+            table[indice] = new Entry<K, V>(null, null, TOMBSTONE);
+            return res.getValue();
+        }
         return null;
     }
 
@@ -270,8 +281,15 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
     @Override
     public void clear()
     {
-        // HACER... obvio...
+        //HECHO
+        this.table = new Object[initial_capacity];
+        for(int i=0; i<table.length; i++)
+        {
+            table[i] = new Entry<K, V>(null, null);
+        }
 
+        this.count = 0;
+        this.modCount++;
     }
 
     /**
@@ -374,7 +392,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
     @Override
     protected Object clone() throws CloneNotSupportedException
     {
-        // HACER...
+        //TODO
         TSB_OAHashtable<K, V> t = (TSB_OAHashtable<K, V>)super.clone();
 
         return t;
@@ -443,6 +461,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
     public String toString()
     {
         // REVISAR... Asegúrense de que funciona bien...
+        //TODO
         StringBuilder cad = new StringBuilder("[");
         for(int i = 0; i < this.table.length; i++)
         {
@@ -468,7 +487,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
      */
     public boolean contains(Object value)
     {
-        // HACER...
+        //TODO
         if(value == null) return false;
 
         return false;
@@ -739,7 +758,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
      * contiene datos ella misma, sino que accede y gestiona directamente datos
      * de otra fuente), por lo que no tiene atributos y sus métodos gestionan en
      * forma directa el contenido de la tabla. Están soportados los metodos para
-     * eliminar un objeto (remove()), eliminar todo el contenido (clear) y la
+     * eliminar un objeto (remove()), eliminar su contenido (clear) y la
      * creación de un Iterator (que incluye el método Iterator.remove()).
      */
     private class KeySet extends AbstractSet<K>
@@ -777,6 +796,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
         private class KeySetIterator implements Iterator<K>
         {
             // REVISAR y HACER... Agregar los atributos que necesiten...
+            //TODO
 
             // flag para controlar si remove() está bien invocado...
             private boolean next_ok;
@@ -790,7 +810,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
              */
             public KeySetIterator()
             {
-                // HACER...
+                // TODO
                 next_ok = false;
                 expected_modCount = TSB_OAHashtable.this.modCount;
             }
@@ -802,7 +822,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             @Override
             public boolean hasNext()
             {
-                // HACER...
+                // TODO
                 return true;
             }
 
@@ -813,6 +833,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             public K next()
             {
                 // REVISAR Y HACER...
+                //TODO
 
                 // control: fail-fast iterator...
                 if(TSB_OAHashtable.this.modCount != expected_modCount)
@@ -842,6 +863,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             public void remove()
             {
                 // REVISAR Y HACER...
+                //TODO
 
                 if(!next_ok)
                 {
@@ -868,7 +890,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
      * contiene datos ella misma, sino que accede y gestiona directamente datos
      * de otra fuente), por lo que no tiene atributos y sus métodos gestionan en
      * forma directa el contenido de la tabla. Están soportados los metodos para
-     * eliminar un objeto (remove()), eliminar todo el contenido (clear) y la
+     * eliminar un objeto (remove()), eliminar su contenido (clear) y la
      * creación de un Iterator (que incluye el método Iterator.remove()).
      */
     private class EntrySet extends AbstractSet<Map.Entry<K, V>>
@@ -887,7 +909,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
         @Override
         public boolean contains(Object o)
         {
-            // HACER...
+            // TODO
             if(o == null) { return false; }
             if(!(o instanceof Entry)) { return false; }
 
@@ -901,7 +923,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
         @Override
         public boolean remove(Object o)
         {
-            // HACER...
+            // TODO
             if(o == null) { throw new NullPointerException("remove(): parámetro null");}
             if(!(o instanceof Entry)) { return false; }
 
@@ -923,6 +945,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
         private class EntrySetIterator implements Iterator<Map.Entry<K, V>>
         {
             // REVISAR y HACER... Agregar los atributos que necesiten...
+            //TODO
 
             // flag para controlar si remove() está bien invocado...
             private boolean next_ok;
@@ -936,7 +959,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
              */
             public EntrySetIterator()
             {
-                // HACER...
+                // TODO
 
                 next_ok = false;
                 expected_modCount = TSB_OAHashtable.this.modCount;
@@ -949,7 +972,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             @Override
             public boolean hasNext()
             {
-                // HACER...
+                //TODO
 
                 return true;
             }
@@ -960,7 +983,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             @Override
             public Map.Entry<K, V> next()
             {
-                //HACER...
+                //TODO
 
                 // control: fail-fast iterator...
                 if(TSB_OAHashtable.this.modCount != expected_modCount)
@@ -990,7 +1013,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             @Override
             public void remove()
             {
-                // HACER...
+                // TODO
 
                 if(!next_ok)
                 {
@@ -1018,7 +1041,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
      * no contiene datos ella misma, sino que accede y gestiona directamente los
      * de otra fuente), por lo que no tiene atributos y sus métodos gestionan en
      * forma directa el contenido de la tabla. Están soportados los metodos para
-     * eliminar un objeto (remove()), eliminar todo el contenido (clear) y la
+     * eliminar un objeto (remove()), eliminar su contenido (clear) y la
      * creación de un Iterator (que incluye el método Iterator.remove()).
      */
     private class ValueCollection extends AbstractCollection<V>
@@ -1050,6 +1073,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
         private class ValueCollectionIterator implements Iterator<V>
         {
             // REVISAR y HACER... Agregar los atributos que necesiten...
+            //TODO
 
             // flag para controlar si remove() está bien invocado...
             private boolean next_ok;
@@ -1063,7 +1087,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
              */
             public ValueCollectionIterator()
             {
-                // HACER...
+                // TODO
 
                 next_ok = false;
                 expected_modCount = TSB_OAHashtable.this.modCount;
@@ -1076,8 +1100,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             @Override
             public boolean hasNext()
             {
-                // HACER...
-
+                // TODO
                 return true;
             }
 
@@ -1087,7 +1110,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             @Override
             public V next()
             {
-                // HACER...
+                // TODO
 
                 // control: fail-fast iterator...
                 if(TSB_OAHashtable.this.modCount != expected_modCount)
@@ -1118,7 +1141,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             @Override
             public void remove()
             {
-                // HACER...
+                // TODO
 
                 if(!next_ok)
                 {
