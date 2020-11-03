@@ -3,6 +3,8 @@ package negocio;
 import soporte.TSBHashtable;
 import soporte.TextFile;
 
+import java.util.Collection;
+
 public class Resultados {
     private TSBHashtable tabla;
 
@@ -21,5 +23,10 @@ public class Resultados {
 //        }
         Agrupaciones a = (Agrupaciones) tabla.get(codRegion);
         a.getAgrupacion(codAgrupacion).sumarVotos(votos);
+    }
+
+    public Collection getResultadosRegion(String codRegion){
+        Agrupaciones a = (Agrupaciones ) tabla.get(codRegion);
+        return a.getResultados();
     }
 }

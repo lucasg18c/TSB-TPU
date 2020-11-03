@@ -18,6 +18,7 @@ public class PrincipalController {
     public ComboBox cboDistrito;
     public ComboBox cboSeccion;
     public ComboBox cboCircuito;
+    public Resultados res;
 
     public void cambiarUbicacion(ActionEvent actionEvent) {
         DirectoryChooser dc = new DirectoryChooser();
@@ -42,25 +43,47 @@ public class PrincipalController {
         ObservableList ol = FXCollections.observableArrayList(regiones.getDistritos());
         cboDistrito.setItems(ol);
 
-        Resultados res = new Resultados(lblDireccion.getText());
+        res = new Resultados(lblDireccion.getText());
 
+        ol = FXCollections.observableArrayList(res.getResultadosRegion("00"));
+        lvwResultados.setItems(ol);
     }
 
-    public void filtrarSecciones(ActionEvent actionEvent) {
+    public void elegirDistrito(ActionEvent actionEvent) {
         //Generamos lista de secciones del dsitrito elegido
         Region distrito = (Region) cboDistrito.getValue();
         ObservableList ol = FXCollections.observableArrayList(distrito.getSubregiones());
         cboSeccion.setItems(ol);
         cboCircuito.setItems(null);
+        //mostramos resultados del dsitrito
+        ol = FXCollections.observableArrayList(res.getResultadosRegion(distrito.getCodigo()));
+        lvwResultados.setItems(ol);
     }
 
-    public void filtrarCircuitos(ActionEvent actionEvent) {
+    public void elegirSeccion(ActionEvent actionEvent) {
         ObservableList ol;
         //Genereamos lista de circuitos de la seccion
-        if (cboSeccion.getItems() != null && cboSeccion.getValue() != null){
+        if (cboSeccion.getValue() != null){
             Region seccion = (Region) cboSeccion.getValue();
             ol = FXCollections.observableArrayList(seccion.getSubregiones());
             cboCircuito.setItems(ol);
+            //R4esultados de la seccion
+            ol = FXCollections.observableArrayList(res.getResultadosRegion(seccion.getCodigo()));
+            lvwResultados.setItems(ol);
+        }
+        else
+            cboCircuito.setItems(null);
+    }
+
+    public void elegirCircuito(ActionEvent actionEvent) {
+        ObservableList ol;
+        //Genereamos lista de circuitos de la seccion
+        if (cboCircuito.getValue() != null){
+            Region circuito = (Region) cboCircuito.getValue();
+
+            //R4esultados del Circuito
+            ol = FXCollections.observableArrayList(res.getResultadosRegion(circuito.getCodigo()));
+            lvwResultados.setItems(ol);
         }
         else
             cboCircuito.setItems(null);

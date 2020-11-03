@@ -39,6 +39,10 @@ public class Region {
         return codigo + " - " + nombre;
     }
 
+    public String getCodigo() {
+        return codigo;
+    }
+
     public Region getSubregion(String codigo) {
         return (Region) subregiones.get(codigo);
     }
