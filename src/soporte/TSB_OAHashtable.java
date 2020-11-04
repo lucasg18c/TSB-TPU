@@ -252,6 +252,8 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
         if (indice != -1){
             Map.Entry<K, V> res = (Entry<K, V>) table[indice];
             table[indice] = new Entry<K, V>(null, null, TOMBSTONE);
+            count--;
+            modCount++;
             return res.getValue();
         }
         return null;
@@ -460,15 +462,12 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
     @Override
     public String toString()
     {
-        // REVISAR... Asegúrense de que funciona bien...
-        //TODO
+        // HECHO, se podrían agregar comas
         StringBuilder cad = new StringBuilder("[");
-        for(int i = 0; i < this.table.length; i++)
-        {
-            Entry<K, V> entry = (Entry<K, V>) table[i];
-            if(entry.getState() == CLOSED)
-            {
-                cad.append(entry.toString());
+        for (Object o : this.table) {
+            Entry<K, V> entry = (Entry<K, V>) o;
+            if (entry.getState() == CLOSED) {
+                cad.append(entry.getValue().toString());
                 cad.append(" ");
             }
         }
@@ -487,9 +486,17 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
      */
     public boolean contains(Object value)
     {
-        //TODO
+        //HECHO
         if(value == null) return false;
 
+        V valor = (V) value;
+
+        for (int i = 0; i < table.length; i++){
+            Entry<K, V> entry = (Entry<K, V>) table[i];
+
+            if ( entry.getState() == CLOSED && entry.getValue().equals(valor))
+                return true;
+        }
         return false;
     }
 
@@ -795,8 +802,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
 
         private class KeySetIterator implements Iterator<K>
         {
-            // REVISAR y HACER... Agregar los atributos que necesiten...
-            //TODO
+            // HECHO
 
             // flag para controlar si remove() está bien invocado...
             private boolean next_ok;
@@ -804,15 +810,28 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             // el valor que debería tener el modCount de la tabla completa...
             private int expected_modCount;
 
+            // posición actual del iterador
+            private int current_index;
+
+            // cantidad de elementos retornados
+            private int retornados;
+
+            // posición anterior con algún valor
+            private int previous_index;
+
+
             /*
              * Crea un iterador comenzando en la primera lista. Activa el
              * mecanismo fail-fast.
              */
             public KeySetIterator()
             {
-                // TODO
+                // hecho
                 next_ok = false;
                 expected_modCount = TSB_OAHashtable.this.modCount;
+                current_index = -1;
+                retornados = 0;
+                previous_index = -1;
             }
 
             /*
@@ -822,8 +841,8 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             @Override
             public boolean hasNext()
             {
-                // TODO
-                return true;
+                // HECHO
+                return retornados < TSB_OAHashtable.this.count;
             }
 
             /*
@@ -832,8 +851,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             @Override
             public K next()
             {
-                // REVISAR Y HACER...
-                //TODO
+                // HECHO
 
                 // control: fail-fast iterator...
                 if(TSB_OAHashtable.this.modCount != expected_modCount)
@@ -849,7 +867,18 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
                 // avisar que next() fue invocado con éxito...
                 next_ok = true;
 
+                // incrementar el contador de cantidad de elementos retornados
+                retornados++;
+
+                // guardar la posición
+                previous_index = current_index;
+
                 // y retornar la clave del elemento alcanzado...
+                int n = TSB_OAHashtable.this.table.length - 1;
+                while (current_index < n ){
+                    Entry<K, V> entry = (Entry<K, V>) TSB_OAHashtable.this.table[++current_index];
+                    if (entry.getState() == CLOSED) return entry.getKey();
+                }
                 return null;
             }
 
@@ -862,8 +891,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             @Override
             public void remove()
             {
-                // REVISAR Y HACER...
-                //TODO
+                // HECHO
 
                 if(!next_ok)
                 {
@@ -874,11 +902,21 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
                 next_ok = false;
 
                 // la tabla tiene un elementon menos...
-                TSB_OAHashtable.this.count--;
+                //TSB_OAHashtable.this.count--; ya lo realiza el método remove
 
                 // fail_fast iterator...
-                TSB_OAHashtable.this.modCount++;
+                // TSB_OAHashtable.this.modCount++; ya lo realiza el método remove
                 expected_modCount++;
+
+                // disminuye la cantidad de retornados
+                retornados--;
+
+                // obtener la key actual y remover el entry
+                Entry<K, V> entry = (Entry<K, V>) TSB_OAHashtable.this.table[current_index];
+                TSB_OAHashtable.this.remove(entry.getKey());
+
+                // volver el iterador a la posición anterior
+                current_index = previous_index;
             }
         }
     }
