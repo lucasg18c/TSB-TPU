@@ -100,10 +100,11 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
                 initial_capacity = nextPrime(initial_capacity);
             }
         }
-
+        //crea la tabla con capacodad inicial de tipo object
         this.table = new Object[initial_capacity];
         for(int i=0; i<table.length; i++)
         {
+            //las llena de nulos
             table[i] = new Entry<K, V>(null, null);
         }
 
@@ -388,16 +389,25 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
      * los objetos que esas listas contienen: en cada bucket de la tabla se
      * almacenan las direcciones de los mismos objetos que contiene la original.
      * @return una copia superficial de la tabla.
-     * @throws java.lang.CloneNotSupportedException si la clase no implementa la
+     * @throws CloneNotSupportedException si la clase no implementa la
      *         interface Cloneable.
      */
     @Override
     protected Object clone() throws CloneNotSupportedException
     {
         //TODO
+        //Comenzado
         TSB_OAHashtable<K, V> t = (TSB_OAHashtable<K, V>)super.clone();
 
+        t.table = new Object[table.length];
+        System.arraycopy(this.table, 0, t.table, 0, count);
+
+        t.keySet = null;
+        t.entrySet = null;
+        t.values = null;
+        t.modCount = 0;
         return t;
+
     }
 
     /**
@@ -792,6 +802,7 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
         public boolean remove(Object o)
         {
             return (TSB_OAHashtable.this.remove(o) != null);
+
         }
 
         @Override
@@ -948,9 +959,16 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
         public boolean contains(Object o)
         {
             // TODO
+            //Probar
             if(o == null) { return false; }
             if(!(o instanceof Entry)) { return false; }
 
+            Map.Entry<K, V> entry = (Map.Entry<K,V>)o;
+            K key = entry.getKey();
+            int index = TSB_OAHashtable.this.h(key);
+
+            TSB_OAHashtable<Map.Entry<K, V>> bucket =  TSB_OAHashtable.this.table[index];
+            if(bucket.contains(entry)) { return true; }
             return false;
         }
 
@@ -962,9 +980,21 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
         public boolean remove(Object o)
         {
             // TODO
+            // probar
             if(o == null) { throw new NullPointerException("remove(): parámetro null");}
             if(!(o instanceof Entry)) { return false; }
 
+            Map.Entry<K, V> entry = (Map.Entry<K, V>) o;
+            K key = entry.getKey();
+            int index = TSB_OAHashtable.this.h(key);
+            TSB_OAHashtable<Map.Entry<K, V>> bucket = TSB_OAHashtable.this.table[index];
+
+            if(bucket.remove(entry))
+            {
+                TSB_OAHashtable.this.count--;
+                TSB_OAHashtable.this.modCount++;
+                return true;
+            }
             return false;
         }
 
@@ -985,6 +1015,15 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             // REVISAR y HACER... Agregar los atributos que necesiten...
             //TODO
 
+            // índice de la lista actualmente recorrida...
+            private int current_bucket;
+
+            // índice de la lista anterior (si se requiere en remove())...
+            private int last_bucket;
+
+            // índice del elemento actual en el iterador (el que fue retornado
+            // la última vez por next() y será eliminado por remove())...
+            private int current_entry;
             // flag para controlar si remove() está bien invocado...
             private boolean next_ok;
 
@@ -998,6 +1037,9 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             public EntrySetIterator()
             {
                 // TODO
+                current_bucket = 0;
+                last_bucket = 0;
+                current_entry = -1;
 
                 next_ok = false;
                 expected_modCount = TSB_OAHashtable.this.modCount;
@@ -1012,6 +1054,23 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             {
                 //TODO
 
+                // variable auxiliar t para simplificar accesos...
+                TSB_OAHashtable<Map.Entry<K, V>> t = TSB_OAHashtable.this.table;
+
+                if(TSB_OAHashtable.this.isEmpty()) { return false; }
+                if(current_bucket >= t.length) { return false; }
+
+                // bucket actual vacío o listo?...
+                if(t[current_bucket].isEmpty() || current_entry >= t[current_bucket].size() - 1)
+                {
+                    // ... -> ver el siguiente bucket no vacío...
+                    int next_bucket = current_bucket + 1;
+                    while(next_bucket < t.length && t[next_bucket].isEmpty())
+                    {
+                        next_bucket++;
+                    }
+                    if(next_bucket >= t.length) { return false; }
+                }
                 return true;
             }
 
@@ -1032,6 +1091,32 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
                 if(!hasNext())
                 {
                     throw new NoSuchElementException("next(): no existe el elemento pedido...");
+                }
+                // variable auxiliar t para simplificar accesos...
+                TSB_OAHashtable<Map.Entry<K, V>> t[] = TSB_OAHashtable.this.table;
+
+                // se puede seguir en el mismo bucket?...
+                TSB_OAHashtable<Map.Entry<K, V>> bucket = t[current_bucket];
+                if(!t[current_bucket].isEmpty() && current_entry < bucket.size() - 1) { current_entry++; }
+                else
+                {
+                    // si no se puede...
+                    // ...recordar el índice del bucket que se va a abandonar..
+                    last_bucket = current_bucket;
+
+                    // buscar el siguiente bucket no vacío, que DEBE existir, ya
+                    // que se hasNext() retornó true...
+                    current_bucket++;
+                    while(t[current_bucket].isEmpty())
+                    {
+                        current_bucket++;
+                    }
+
+                    // actualizar la referencia bucket con el núevo índice...
+                    bucket = t[current_bucket];
+
+                    // y posicionarse en el primer elemento de ese bucket...
+                    current_entry = 0;
                 }
 
 
@@ -1056,6 +1141,15 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
                 if(!next_ok)
                 {
                     throw new IllegalStateException("remove(): debe invocar a next() antes de remove()...");
+                }
+                // eliminar el objeto que retornó next() la última vez...
+                Map.Entry<K, V> garbage = TSB_OAHashtable.this.table[current_bucket].remove(current_entry);
+
+                // quedar apuntando al anterior al que se retornó...
+                if(last_bucket != current_bucket)
+                {
+                    current_bucket = last_bucket;
+                    current_entry = TSB_OAHashtable.this.table[current_bucket].size() - 1;
                 }
 
 
@@ -1113,6 +1207,10 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             // REVISAR y HACER... Agregar los atributos que necesiten...
             //TODO
 
+            // indice de la lista actualmetne recorrida
+            private int current_bucket;
+            private int last_bucket;
+            private int current_entry;
             // flag para controlar si remove() está bien invocado...
             private boolean next_ok;
 
@@ -1126,7 +1224,9 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             public ValueCollectionIterator()
             {
                 // TODO
-
+                current_bucket = 0;
+                last_bucket = 0;
+                current_entry = -1;
                 next_ok = false;
                 expected_modCount = TSB_OAHashtable.this.modCount;
             }
@@ -1139,6 +1239,25 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
             public boolean hasNext()
             {
                 // TODO
+                // variable auxiliar t para simplificar accesos...
+                TSB_OAHashtable<Map.Entry<K, V>> t[] = TSB_OAHashtable.this.table;
+
+                if(TSB_OAHashtable.this.count == 0) { return false; }
+                if(current_bucket >= t.length) { return false; }
+
+                // bucket actual vacío o listo?...
+                if(t[current_bucket].isEmpty() || current_entry >= t[current_bucket].size() - 1)
+                {
+                    // ... -> ver el siguiente bucket no vacío...
+                    int next_bucket = current_bucket + 1;
+                    while(next_bucket < t.length && t[next_bucket].isEmpty())
+                    {
+                        next_bucket++;
+                    }
+                    if(next_bucket >= t.length) { return false; }
+                }
+
+                // en principio alcanza con esto... revisar...
                 return true;
             }
 
@@ -1162,11 +1281,38 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
                 }
 
 
+                // variable auxiliar t para simplificar accesos...
+                TSB_OAHashtable<Map.Entry<K, V>> t[] = TSB_OAHashtable.this.table;
+
+                // se puede seguir en el mismo bucket?...
+                TSB_OAHashtable<Map.Entry<K, V>> bucket = t[current_bucket];
+                if(!t[current_bucket].isEmpty() && current_entry < bucket.size() - 1) { current_entry++; }
+                else
+                {
+                    // si no se puede...
+                    // ...recordar el índice del bucket que se va a abandonar..
+                    last_bucket = current_bucket;
+
+                    // buscar el siguiente bucket no vacío, que DEBE existir, ya
+                    // que se hasNext() retornó true...
+                    current_bucket++;
+                    while(t[current_bucket].isEmpty())
+                    {
+                        current_bucket++;
+                    }
+
+                    // actualizar la referencia bucket con el núevo índice...
+                    bucket = t[current_bucket];
+
+                    // y posicionarse en el primer elemento de ese bucket...
+                    current_entry = 0;
+                }
+
                 // avisar que next() fue invocado con éxito...
                 next_ok = true;
 
                 // y retornar la clave del elemento alcanzado...
-                V value = null;
+                V value = (V) bucket.get(current_entry);
                 return value;
             }
 
@@ -1184,6 +1330,18 @@ public class TSB_OAHashtable<K,V> implements Map<K,V>, Cloneable, Serializable
                 if(!next_ok)
                 {
                     throw new IllegalStateException("remove(): debe invocar a next() antes de remove()...");
+                }
+                // eliminar el objeto que retornó next() la última vez...
+                Map.Entry<K, V> garbage = (Map.Entry<K, V>) TSB_OAHashtable.this.table[current_bucket].remove(current_entry);
+
+
+
+
+                // quedar apuntando al anterior al que se retornó...
+                if(last_bucket != current_bucket)
+                {
+                    current_bucket = last_bucket;
+                    current_entry = TSB_OAHashtable.this.table[current_bucket].size() - 1;
                 }
 
 
