@@ -1,16 +1,16 @@
 package negocio;
 
-import soporte.TSBHashtable;
+import soporte.TSB_OAHashtable;
 import soporte.TextFile;
 
 import java.util.Collection;
 
 public class Agrupaciones {
-    private TSBHashtable conteo;
-    private static TSBHashtable inicial;
+    private TSB_OAHashtable conteo;
+    private static TSB_OAHashtable inicial;
 
     public Agrupaciones() {
-        conteo = new TSBHashtable();
+        conteo = new TSB_OAHashtable();
 
         for (Object o: inicial.values()){
             Agrupacion a = (Agrupacion) o;

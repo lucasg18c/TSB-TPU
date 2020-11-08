@@ -27,9 +27,9 @@ public class TextFile {
         return linea;
     }
 
-    public TSBHashtable identificarAgrupaciones() {
+    public TSB_OAHashtable identificarAgrupaciones() {
         String linea = "", campos[];
-        TSBHashtable table = new TSBHashtable();
+        TSB_OAHashtable table = new TSB_OAHashtable();
         Agrupacion agrupacion;
         try {
             Scanner sc = new Scanner(archivo);
@@ -49,7 +49,7 @@ public class TextFile {
         return table;
     }
 
-    public void sumarVotosPorAgrupacion(TSBHashtable table) {
+    public void sumarVotosPorAgrupacion(TSB_OAHashtable table) {
         String linea = "", campos[];
 
         Agrupacion agrupacion;

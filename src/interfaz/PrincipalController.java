@@ -3,7 +3,9 @@ package interfaz;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.scene.Cursor;
 import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.DirectoryChooser;
 import negocio.Agrupaciones;
 import negocio.Region;
@@ -19,17 +21,34 @@ public class PrincipalController {
     public ComboBox cboSeccion;
     public ComboBox cboCircuito;
     public Resultados res;
+    public AnchorPane apnVentana;
 
     public void cambiarUbicacion(ActionEvent actionEvent) {
         DirectoryChooser dc = new DirectoryChooser();
         dc.setTitle("Seleccione ubicación de los datos");
 
-        if (!lblDireccion.getText().equals("Seleccione origen de datos"))
+        if (!lblDireccion.getText().equals("Seleccione origen de datos")) {
             dc.setInitialDirectory(new File(lblDireccion.getText()));
+        }
         File file =  dc.showDialog(null);
         if (file != null){
-            lblDireccion.setText(file.getPath());
-            cargarDatos(null);
+            apnVentana.setCursor(Cursor.WAIT);
+
+            try
+            {
+                lblDireccion.setText(file.getPath());
+                cargarDatos(null);
+            }
+            catch (Exception exception){
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Ubicación inválida");
+                alert.setHeaderText(null);
+                alert.setContentText("No se han encontrado los archivos necesarios en esta ubicación");
+                alert.showAndWait();
+            }
+            finally {
+                apnVentana.setCursor(Cursor.DEFAULT);
+            }
         }
     }
 
@@ -67,7 +86,7 @@ public class PrincipalController {
             Region seccion = (Region) cboSeccion.getValue();
             ol = FXCollections.observableArrayList(seccion.getSubregiones());
             cboCircuito.setItems(ol);
-            //R4esultados de la seccion
+            //Resultados de la seccion
             ol = FXCollections.observableArrayList(res.getResultadosRegion(seccion.getCodigo()));
             lvwResultados.setItems(ol);
         }
