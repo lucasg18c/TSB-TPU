@@ -3,6 +3,7 @@ package test;
 import soporte.TSB_OAHashtable;
 
 import java.util.Iterator;
+import java.util.Map;
 
 public class Test_TSB_OAHashtable {
 
@@ -36,8 +37,54 @@ public class Test_TSB_OAHashtable {
             }
 
         }
+        System.out.println(tabla.toString());
+
+        for (String s: tabla.values()){
+            System.out.println(s);
+        }
+
+        for (Map.Entry<Integer, String> s: tabla.entrySet()){
+            System.out.println(s);
+        }
+
+        try {
+            TSB_OAHashtable<Integer, String> t2 = (TSB_OAHashtable<Integer, String>) tabla.clone();
+            System.out.println(t2.toString());
+
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+
+
+        Iterator itEntry = tabla.entrySet().iterator();
+
+        while (itEntry.hasNext()){
+            Map.Entry e = (Map.Entry<Integer, String>) itEntry.next();
+
+            if (e.getValue().equals("holaa5")){
+                itEntry.remove();
+            }
+        }
 
         System.out.println(tabla.toString());
+
+        tabla.put(5, "jamón");
+
+        System.out.println(tabla.toString());
+
+        Iterator itValue = tabla.values().iterator();
+
+        while (itValue.hasNext()){
+            String valor = (String) itValue.next();
+            if (valor.equals("jamón")) itValue.remove();
+        }
+        System.out.println(tabla.toString());
+
+        if (tabla.values().contains("hola")) System.out.println("tiene hola");
+        else System.out.println("No tiene hola");
+
+        if (tabla.values().contains("holaa1")) System.out.println("tiene holaa1");
+        else System.out.println("No tiene hola");
 
     }
 }
